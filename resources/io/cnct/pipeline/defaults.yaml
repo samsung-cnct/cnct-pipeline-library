@@ -3,7 +3,7 @@ jenkinsNamespace: pipeline-tools
 awsCredSecret: vault-aws-creds
 prodNamespace: prod
 stageNamespace: staging
-serviceAccount: jenkins
+serviceAccount: jenkins-instance
 workspaceSize: 5Gi
 dockerBuilderSize: 10Gi
 pvcZone: us-east-1a
