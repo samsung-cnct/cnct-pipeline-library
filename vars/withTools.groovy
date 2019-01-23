@@ -45,11 +45,11 @@ spec:
   if (pvcVarLibDockerName) {
     volumes.add(persistentVolumeClaim(mountPath: '/var/lib/docker', claimName: pvcVarLibDockerName, readOnly: false))
   } else {
-    volumes.add(secretVolume(mountPath: '/var/aws', secretName: globalDefaults.awsCredSecret))
+    volumes.add(emptyDirVolume(mountPath: '/var/lib/docker', memory: false))
   }
 
   // add aws credentials mount
-  volumes.add()
+  volumes.add(secretVolume(mountPath: '/var/aws', secretName: globalDefaults.awsCredSecret))
 
   containerTemplates.add(
     containerTemplate(
