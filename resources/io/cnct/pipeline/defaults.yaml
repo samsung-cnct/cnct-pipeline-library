@@ -6,7 +6,7 @@ stageNamespace: staging
 serviceAccount: jenkins-instance
 workspaceSize: 5Gi
 dockerBuilderSize: 10Gi
-pvcZone: us-east-1a
+pvcZone: us-west-2a
 doDeploy: none
 retries: 1
 timeout: 600
