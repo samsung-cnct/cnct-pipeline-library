@@ -37,7 +37,7 @@ vault:
   credentials: vault-plugin
   api: v1
 helm:
-  namespace: pipeline-tools
+  namespace: kube-system
   registry: charts.cnct.team
   credentials: chart-creds
 docker:
