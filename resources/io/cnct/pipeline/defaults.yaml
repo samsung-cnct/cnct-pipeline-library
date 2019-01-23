@@ -1,0 +1,63 @@
+---
+jenkinsNamespace: pipeline-tools
+prodNamespace: prod
+stageNamespace: staging
+serviceAccount: jenkins
+workspaceSize: 5Gi
+dockerBuilderSize: 10Gi
+pvcZone: us-east-1a
+doDeploy: none
+retries: 1
+timeout: 600
+versionfile: .versionfile
+shell: sh
+ciSkip: "JENKINSCISKIP"
+targets: 
+  prodCluster: secret/prod-cluster/config
+  stagingCluster: secret/staging-cluster/config
+  testCluster: secret/test-cluster/config
+github:
+  credentials: github-access
+  pushUser: jenkins
+  pushEmail: jenkins@cnct.io
+slack:
+  channel: #ping-github
+  credentials: slack-access
+  domain: "samsung-cnct"
+images: 
+  dind: docker:stable-dind
+  docker: docker:stable
+  helm: quay.io/samsung_cnct/pipeline-library-helm:latest
+  vault: quay.io/samsung_cnct/pipeline-library-vault:latest
+  script: quay.io/samsung_cnct/pipeline-library-script:latest
+  yaml: quay.io/samsung_cnct/pipeline-library-yaml:latest
+vault:
+  server: http://vault.pipeline-tools.svc.cluster.local
+  credentials: vault-plugin
+  api: v1
+helm:
+  namespace: pipeline-tools
+  registry: charts.cnct.team
+  credentials: chart-creds
+docker:
+  registry: quay.io
+  credentials: docker-creds
+  testTag: test
+  stageTag: staging
+  prodTag: prod
+tls:
+  prodIssuer: prod-issuer
+  stagingIssuer: staging-issuer
+packages:
+  - rootfs
+  - build
+  - build/docker
+deployments:
+  - charts
+  - deployments
+  - deployments/helm
+cveScan:
+  maxCve: 0
+  maxLevel: Critical
+  ignore: False
+
