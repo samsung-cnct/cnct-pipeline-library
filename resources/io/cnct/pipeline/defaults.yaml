@@ -22,7 +22,7 @@ github:
   pushUser: jenkins
   pushEmail: jenkins@cnct.io
 slack:
-  channel: #ping-github
+  channel: #estore-demo
   credentials: slack-access
   domain: "samsung-cnct"
 images: 
@@ -33,7 +33,7 @@ images:
   script: quay.io/samsung_cnct/pipeline-library-script:latest
   yaml: quay.io/samsung_cnct/pipeline-library-yaml:latest
 vault:
-  server: http://vault.pipeline-tools.svc.cluster.local
+  server: https://secrets.cnct.team
   credentials: vault-plugin
   api: v1
 helm:
