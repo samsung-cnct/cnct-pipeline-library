@@ -7,8 +7,6 @@ def call(Map defaultVals, String token, String path) {
   def valuePath = path.tokenize('/')[2..-1].join('/')
 
   def curl = """curl --connect-timeout 1 -s --location --header 'X-Vault-Token: ${token}' \
---cert \${VAULT_CLIENT_CERT} --cert-type PEM --key \${VAULT_CLIENT_KEY} \
---key-type PEM --cacert \${VAULT_CACERT} \
 '${defaultVals.vault.server}/${defaultVals.vault.api}/${vaultPath}'""" 
   def response = sh(returnStdout: true, script: curl)
   
