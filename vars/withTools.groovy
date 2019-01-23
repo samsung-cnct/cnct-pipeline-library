@@ -40,12 +40,16 @@ spec:
   }
 
   envVars.add(containerEnvVar(key: 'DOCKER_HOST', value: 'localhost:2375'))
+  envVars.add(containerEnvVar(key: 'AWS_SHARED_CREDENTIALS_FILE', value: '/var/aws/credentials'))
 
   if (pvcVarLibDockerName) {
     volumes.add(persistentVolumeClaim(mountPath: '/var/lib/docker', claimName: pvcVarLibDockerName, readOnly: false))
   } else {
-    volumes.add(emptyDirVolume(mountPath: '/var/lib/docker', memory: false))
+    volumes.add(secretVolume(mountPath: '/var/aws', secretName: globalDefaults.awsCredSecret))
   }
+
+  // add aws credentials mount
+  volumes.add()
 
   containerTemplates.add(
     containerTemplate(

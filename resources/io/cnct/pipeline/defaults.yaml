@@ -1,5 +1,6 @@
 ---
 jenkinsNamespace: pipeline-tools
+awsCredSecret: vault-aws-creds
 prodNamespace: prod
 stageNamespace: staging
 serviceAccount: jenkins
@@ -12,7 +13,7 @@ timeout: 600
 versionfile: .versionfile
 shell: sh
 ciSkip: "JENKINSCISKIP"
-targets: 
+targets:
   prodCluster: secret/prod-cluster/config
   stagingCluster: secret/staging-cluster/config
   testCluster: secret/test-cluster/config
