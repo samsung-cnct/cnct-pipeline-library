@@ -15,8 +15,8 @@ def call(certificateConf, issuerName) {
       "acme": [
         "config": [ 
           [
-            "dns01": [
-              "provider": "route53",
+            "http01": [
+              "ingressClass": "pipeline-nginx",
             ],
             "domains": []
           ]
