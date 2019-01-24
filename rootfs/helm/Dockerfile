@@ -1,7 +1,7 @@
 FROM lachlanevenson/k8s-helm:latest
 LABEL authors="Marat Garafutdinov<maratoid@gmail.com>"
 
-ENV KUBE_LATEST_VERSION="v1.9.5"
+ENV KUBE_LATEST_VERSION="v1.11.6"
 
 RUN apk add --update ca-certificates \
  && apk add --update -t deps curl \
