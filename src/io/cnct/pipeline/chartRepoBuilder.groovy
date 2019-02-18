@@ -1369,6 +1369,7 @@ def executeUserScript(stageText, scriptObj, additionalEnvs = []) {
 
         withEnv(
           [
+            "DOCKER_HOST=localhost:2375",
             "PIPELINE_PROD_NAMESPACE=${pipeline.prod.namespace}",
             "PIPELINE_STAGE_NAMESPACE=${pipeline.stage.namespace}",
             "PIPELINE_TEST_NAMESPACE=${kubeName(env.JOB_NAME)}",
