@@ -26,8 +26,8 @@ slack:
   credentials: slack-access
   domain: "samsung-cnct"
 images: 
-  dind: docker:stable-dind
-  docker: docker:stable
+  dind: docker:18.09.2-dind
+  docker: docker:18.09.2
   helm: quay.io/samsung_cnct/pipeline-library-helm:latest
   vault: quay.io/samsung_cnct/pipeline-library-vault:latest
   script: quay.io/samsung_cnct/pipeline-library-script:latest

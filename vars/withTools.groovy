@@ -39,6 +39,7 @@ spec:
     workspaceVolume = persistentVolumeClaimWorkspaceVolume(claimName: pvcWorkspaceName, readOnly: false)
   }
 
+  // add variable pointing to docker-in-docker daemon
   envVars.add(containerEnvVar(key: 'DOCKER_HOST', value: 'localhost:2375'))
   envVars.add(containerEnvVar(key: 'AWS_SHARED_CREDENTIALS_FILE', value: '/var/aws/credentials'))
 
@@ -50,6 +51,10 @@ spec:
 
   // add aws credentials mount
   volumes.add(secretVolume(mountPath: '/var/aws', secretName: globalDefaults.awsCredSecret))
+
+   // these are needed for creating kind clusters (kubernetes on docker)
+  volumes.add(hostPathVolume(hostPath: '/lib/modules', mountPath: '/lib/modules', memory: false))
+  volumes.add(hostPathVolume(hostPath: '/sys/fs/cgroup', mountPath: '/sys/fs/cgroup', memory: false))
 
   containerTemplates.add(
     containerTemplate(
