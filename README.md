@@ -224,7 +224,7 @@ credentials: github-access
 Add the jenkins job badge to your repo README.md:
 
 ```
-[![Build Status](https://jenkins.cnct.team.io/buildStatus/icon?job=pipeline-MY-CHART-NAME/master)](https://jenkins.cnct.team/job/pipeline-MY-CHART-NAME/job/master)
+[![Build Status](https://jenkins.cnct.io/buildStatus/icon?job=pipeline-MY-CHART-NAME/master)](https://jenkins.cnct.io/job/pipeline-MY-CHART-NAME/job/master)
 ```
 
 # Conversion from solas
@@ -411,7 +411,7 @@ vault:
     ca: "ca.pem"
 helm:
   namespace: kube-system
-  registry: charts.cnct.team
+  registry: charts.cnct.io
 docker:
   registry: quay.io
   credentials: docker-creds
