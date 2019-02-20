@@ -12,7 +12,7 @@ retries: 1
 timeout: 600
 versionfile: .versionfile
 shell: sh
-ciSkip: "JENKINSCISKIP"
+ciSkip: "SKIP_DUE_TO_CI_SELF_COMMIT"
 targets:
   prodCluster: secret/prod-cluster/config
   stagingCluster: secret/staging-cluster/config
