@@ -22,7 +22,7 @@ github:
   pushUser: jenkins
   pushEmail: jenkins@cnct.io
 slack:
-  channel: "#estore-demo"
+  channel: "#ping-github"
   credentials: slack-access
   domain: "samsung-cnct"
 images: 
