@@ -498,7 +498,7 @@ def buildsTestHandler(scmVars) {
     }
 
     stage('Collect cve scan targets') {
-      def clairService = "clair:6060"
+      def clairService = "clair-clair:6060"
       def maxCve = pipeline.cveScan.maxCve
       def maxLevel = pipeline.cveScan.maxLevel
       def ignoreCVE = pipeline.cveScan.ignore
