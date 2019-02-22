@@ -86,8 +86,6 @@ def postCleanup(err) {
           sh("kubectl delete pvc jenkins-workspace-${kubeName(env.JOB_NAME)} --namespace ${defaults.jenkinsNamespace} || true")
           // always cleanup var lib docker pvc
           sh("kubectl delete pvc jenkins-varlibdocker-${kubeName(env.JOB_NAME)} --namespace ${defaults.jenkinsNamespace} || true")
-          // always cleanup storageclass
-          sh("kubectl delete storageclass jenkins-storageclass-${kubeName(env.JOB_NAME)} || true")
           // always clean up pull secrets
           def deletePullSteps = [:]
           for (pull in pipeline.pullSecrets ) {
@@ -186,14 +184,6 @@ def initializeHandler() {
         }
 
         stage('process required kubernetes primitives') {
-          echo('Processing jenkins storage class template')
-          writeFile(file: "${pwd()}/jenkins-storageclass-${kubeName(env.JOB_NAME)}.yaml", 
-            text: libraryResource("io/cnct/pipeline/jenkins-storage-class.yaml"))
-          replaceInYaml("${pwd()}/jenkins-storageclass-${kubeName(env.JOB_NAME)}.yaml", 
-          'metadata.name', "jenkins-storageclass-${kubeName(env.JOB_NAME)}")
-          replaceInYaml("${pwd()}/jenkins-storageclass-${kubeName(env.JOB_NAME)}.yaml", 
-          'parameters.zones', defaults.pvcZone)
-
           echo('Processing pipeline worskspace pvc template')
           writeFile(file: "${pwd()}/jenkins-workspace-${kubeName(env.JOB_NAME)}.yaml", 
             text: libraryResource("io/cnct/pipeline/utility-pvc.yaml"))
@@ -202,7 +192,7 @@ def initializeHandler() {
           replaceInYaml("${pwd()}/jenkins-workspace-${kubeName(env.JOB_NAME)}.yaml", 
           'spec.resources.requests.storage', defaults.workspaceSize)
           replaceInYaml("${pwd()}/jenkins-workspace-${kubeName(env.JOB_NAME)}.yaml", 
-          'spec.storageClassName', "jenkins-storageclass-${kubeName(env.JOB_NAME)}")
+          'spec.storageClassName', defaults.storageClass)
 
           echo('var/lib/docker pvc template')
           writeFile(file: "${pwd()}/jenkins-varlibdocker-${kubeName(env.JOB_NAME)}.yaml", 
@@ -212,27 +202,26 @@ def initializeHandler() {
           replaceInYaml("${pwd()}/jenkins-varlibdocker-${kubeName(env.JOB_NAME)}.yaml", 
           'spec.resources.requests.storage', defaults.dockerBuilderSize)
           replaceInYaml("${pwd()}/jenkins-varlibdocker-${kubeName(env.JOB_NAME)}.yaml", 
-          'spec.storageClassName', "jenkins-storageclass-${kubeName(env.JOB_NAME)}")
+          'spec.storageClassName', defaults.storageClass)
         }        
         
       }
 
       container('helm') {
+        stage('Create job pvcs') {
+          createPVCSteps["jenkins-workspace-${kubeName(env.JOB_NAME)}"] = { 
+            sh("cat ${pwd()}/jenkins-workspace-${kubeName(env.JOB_NAME)}.yaml")
+            sh("kubectl apply -f ${pwd()}/jenkins-workspace-${kubeName(env.JOB_NAME)}.yaml --namespace ${defaults.jenkinsNamespace}")
+          }
 
-        stage('Create jenkins storage class') {
-          sh("cat ${pwd()}/jenkins-storageclass-${kubeName(env.JOB_NAME)}.yaml")
-          sh("kubectl create -f ${pwd()}/jenkins-storageclass-${kubeName(env.JOB_NAME)}.yaml")
-        }
+          createPVCSteps["jenkins-varlibdocker-${kubeName(env.JOB_NAME)}"] = { 
+            sh("cat ${pwd()}/jenkins-varlibdocker-${kubeName(env.JOB_NAME)}.yaml")
+            sh("kubectl apply -f ${pwd()}/jenkins-varlibdocker-${kubeName(env.JOB_NAME)}.yaml --namespace ${defaults.jenkinsNamespace}")
+          }
 
-        stage('Create workspace pvc') {
-          sh("cat ${pwd()}/jenkins-workspace-${kubeName(env.JOB_NAME)}.yaml")
-          sh("kubectl create -f ${pwd()}/jenkins-workspace-${kubeName(env.JOB_NAME)}.yaml --namespace ${defaults.jenkinsNamespace}")
+          parallel createPVCSteps
         }
-
-        stage('Create var/lib/docker pvc') {
-          sh("cat ${pwd()}/jenkins-varlibdocker-${kubeName(env.JOB_NAME)}.yaml")
-          sh("kubectl create -f ${pwd()}/jenkins-varlibdocker-${kubeName(env.JOB_NAME)}.yaml --namespace ${defaults.jenkinsNamespace}")
-        }
+        
 
         stage('Create image pull secrets') {
           def createPullSteps = [:]
@@ -246,7 +235,7 @@ def initializeHandler() {
 
               def createSecrets = """
                 set +x
-                kubectl create secret docker-registry ${pull.name}-${kubeName(env.JOB_NAME)} \
+                kubectl apply secret docker-registry ${pull.name}-${kubeName(env.JOB_NAME)} \
                   --docker-server=${pull.server} \
                   --docker-username=${pull.username} \
                   --docker-password='${secretVal}' \
@@ -518,7 +507,7 @@ def buildsTestHandler(scmVars) {
           stage("Scan image ${imageUrl} for vulnerabilities") {
 
             toYamlFile(klarJobTemplate, "${pwd()}/${jobName}.yaml")
-            sh("kubectl create -f ${pwd()}/${jobName}.yaml --namespace ${defaults.jenkinsNamespace}")
+            sh("kubectl apply -f ${pwd()}/${jobName}.yaml --namespace ${defaults.jenkinsNamespace}")
 
             // create klar job
             def klarPod = sh returnStdout: true, script: "kubectl get pods --selector=job-name=${jobName} --output=jsonpath={.items..metadata.name} --namespace ${defaults.jenkinsNamespace}"
@@ -1424,7 +1413,7 @@ def createCert(namespace) {
     def cert = createCertificate(tlsConf, defaultIssuerName)
     
     toYamlFile(cert, "${pwd()}/${tlsConf.name}-cert.yaml")
-    sh("kubectl create -f ${pwd()}/${tlsConf.name}-cert.yaml --namespace ${namespace} ${kubeconfigStr}")
+    sh("kubectl apply -f ${pwd()}/${tlsConf.name}-cert.yaml --namespace ${namespace} ${kubeconfigStr}")
   }
 }
 

@@ -35,19 +35,19 @@ def setDefaults(rawSettings, defaults) {
   }
   for (secret in rawSettings.pullSecrets) {
     if (!secret.name) {
-      error('Pull secrets must have name, server, username, password and email')
+      error('Pull secrets must have name')
     }
     if (!secret.server) {
-      error('Pull secrets must have name, server, username, password and email')
+      error('Pull secrets must have server')
     }
     if (!secret.username) {
-      error('Pull secrets must have name, server, username, password and email')
+      error('Pull secrets must have username')
     }
     if (!secret.email) {
-      error('Pull secrets must have name, server, username, password and email')
+      error('Pull secrets must have email')
     }
     if (!secret.password) {
-      error('Pull secrets must have name, server, username, password and email')
+      error('Pull secrets must have password')
     }
   }
 
