@@ -13,7 +13,7 @@ retries: 1
 timeout: 600
 versionfile: .versionfile
 shell: sh
-ciSkip: "JENKINSCISKIP"
+ciSkip: "SKIP_DUE_TO_CI_SELF_COMMIT"
 targets:
   prodCluster: secret/prod-cluster/config
   stagingCluster: secret/staging-cluster/config
@@ -23,7 +23,7 @@ github:
   pushUser: jenkins
   pushEmail: jenkins@cnct.io
 slack:
-  channel: "#estore-demo"
+  channel: "#ping-github"
   credentials: slack-access
   domain: "samsung-cnct"
 images: 
