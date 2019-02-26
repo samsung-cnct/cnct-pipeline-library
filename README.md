@@ -878,6 +878,7 @@ The following environment variables are injected into all userscript containers:
 | `PIPELINE_JOB_NAME` | Jenksins job name | `test/PR-6` |
 | `PIPELINE_BUILD_NUMBER` | Jenksins build number | `1` |
 | `PIPELINE_WORKSPACE` | Path to Jenkins workspace in the container | `/home/jenkins/workspace/test_PR-6-U5VHDHDXSBXPPAUMV2CWOZMLZN63RMD3TNPQVTEDDUQI553ZSCRA` |
+| `PIPELINE_DOCKER_TAG` | Docker tag that will be applied to newly built docker images during this run | `0.1.6-fdcff93124d08607bbd5ca0853ad6e98a85690af` |
 
 The following environment vairables are injected into `tests` containers only:
 

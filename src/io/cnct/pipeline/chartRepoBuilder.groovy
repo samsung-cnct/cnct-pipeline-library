@@ -347,7 +347,7 @@ def runPR() {
     
 
       // run before scripts
-      executeUserScript('Executing global \'before\' scripts', pipeline.beforeScript)
+      executeUserScript('Executing global \'before\' scripts', scmVars, pipeline.beforeScript)
 
       // update the versionfile
       if (!isPathChange(defaults.versionfile, "${env.CHANGE_ID}")) {
@@ -367,7 +367,7 @@ def runPR() {
       stageTestHandler(scmVars)
 
       // run after scripts
-      executeUserScript('Executing global \'after\' scripts', pipeline.afterScript)
+      executeUserScript('Executing global \'after\' scripts', scmVars, pipeline.afterScript)
     }
   }
 }
@@ -387,7 +387,7 @@ def runMerge() {
       }
 
       // run before scripts
-      executeUserScript('Executing global \'before\' scripts', pipeline.beforeScript)
+      executeUserScript('Executing global \'before\' scripts', scmVars, pipeline.beforeScript)
 
       // update the versionfile
       if (!isPathChange(defaults.versionfile, "${env.CHANGE_ID}")) {
@@ -401,7 +401,7 @@ def runMerge() {
       pushGitChanges(scmVars)
 
       // run after scripts
-      executeUserScript('Executing global \'after\' scripts', pipeline.afterScript)
+      executeUserScript('Executing global \'after\' scripts', scmVars, pipeline.afterScript)
     }
   }
 }
@@ -421,7 +421,7 @@ def buildsTestHandler(scmVars) {
   def parallelPushSteps = [:]
   def parallelCveSteps = [:]
 
-  executeUserScript('Executing test \'before\' script', pipeline.test.beforeScript)
+  executeUserScript('Executing test \'before\' script', scmVars, pipeline.test.beforeScript)
 
   // get tag text
   def useTag = makeDockerTag(defaults, gitCommit)
@@ -433,7 +433,7 @@ def buildsTestHandler(scmVars) {
           def description = "Executing binary build ${binaryBuildCounter} using ${container.image}"
           def _container = container
           parallelBinaryBuildSteps["binary-build-${binaryBuildCounter}"] = { 
-            executeUserScript(description, _container) 
+            executeUserScript(description, scmVars, _container) 
           }
           binaryBuildCounter += 1 
         } else {
@@ -610,7 +610,7 @@ def buildsStageHandler(scmVars) {
   def parallelTagSteps = [:]
   def parallelPushSteps = [:]
 
-  executeUserScript('Executing stage \'before\' script', pipeline.stage.beforeScript)
+  executeUserScript('Executing stage \'before\' script', scmVars, pipeline.stage.beforeScript)
 
   // get tag text
   def useTag = makeDockerTag(defaults, gitCommit)
@@ -683,7 +683,7 @@ def buildsProdHandler(scmVars) {
   def parallelTagSteps = [:]
   def parallelPushSteps = [:]
 
-  executeUserScript('Executing prod \'before\' script', pipeline.prod.beforeScript)
+  executeUserScript('Executing prod \'before\' script', scmVars, pipeline.prod.beforeScript)
 
   // get tag text
   def usePrereleaseTag = makeDockerTag(defaults, gitCommit)
@@ -700,7 +700,7 @@ def buildsProdHandler(scmVars) {
           def description = "Executing binary build ${binaryBuildCounter} using ${container.image}"
           def _container = container
           parallelBinaryBuildSteps["binary-build-${binaryBuildCounter}"] = { 
-            executeUserScript(description, _container) 
+            executeUserScript(description, scmVars, _container) 
           }
           binaryBuildCounter += 1 
         } else {
@@ -1068,7 +1068,7 @@ def deployToProdHandler(scmVars) {
     }
   }
 
-  executeUserScript('Executing prod \'after\' script', pipeline.prod.afterScript)
+  executeUserScript('Executing prod \'after\' script', scmVars, pipeline.prod.afterScript)
 }
 
 def pushGitChanges(scmVars) {
@@ -1182,12 +1182,12 @@ def testTestHandler(scmVars) {
   for (config in pipeline.deployments) {
     if (config.test.tests) {
       for (test in config.test.tests) {
-        executeUserScript('Executing test test scripts', test, ["KUBECONFIG=${pwd()}/${env.BUILD_ID}-test.kubeconfig"])
+        executeUserScript('Executing test test scripts', scmVars, test, ["KUBECONFIG=${pwd()}/${env.BUILD_ID}-test.kubeconfig"])
       }
     }
   }
 
-  executeUserScript('Executing stage \'after\' script', pipeline.test.afterScript) 
+  executeUserScript('Executing stage \'after\' script', scmVars, pipeline.test.afterScript) 
 }
 
 // run staging tests
@@ -1196,12 +1196,12 @@ def stageTestHandler(scmVars) {
   for (config in pipeline.deployments) {
     if (config.stage.tests) {
       for (test in config.stage.tests) {
-        executeUserScript('Executing staging test scripts', test, ["KUBECONFIG=${pwd()}/${env.BUILD_ID}-staging.kubeconfig"])
+        executeUserScript('Executing staging test scripts', scmVars, test, ["KUBECONFIG=${pwd()}/${env.BUILD_ID}-staging.kubeconfig"])
       }
     }
   }
 
-  executeUserScript('Executing stage \'after\' script', pipeline.stage.afterScript) 
+  executeUserScript('Executing stage \'after\' script', scmVars, pipeline.stage.afterScript) 
 }
 
 // destroy the test namespace
@@ -1237,7 +1237,7 @@ def destroyHandler(scmVars) {
     }
   }
 
-  executeUserScript('Executing test \'after\' script', pipeline.test.afterScript)
+  executeUserScript('Executing test \'after\' script', scmVars, pipeline.test.afterScript)
 }
 
 def envMapToSetParams(envMap) {
@@ -1357,7 +1357,7 @@ def getScriptImages() {
 // script: path/to/some-script.sh
 // ---
 // yaml definition 
-def executeUserScript(stageText, scriptObj, additionalEnvs = []) {
+def executeUserScript(stageText, scmVariables, scriptObj, additionalEnvs = []) {
   if (scriptObj) {
     stage(stageText) {
       container(containerName(scriptObj.image)) {
@@ -1374,7 +1374,8 @@ def executeUserScript(stageText, scriptObj, additionalEnvs = []) {
             "PIPELINE_BUILD_ID=${env.BUILD_ID}",
             "PIPELINE_JOB_NAME=${env.JOB_NAME}",
             "PIPELINE_BUILD_NUMBER=${env.BUILD_NUMBER}",
-            "PIPELINE_WORKSPACE=${env.WORKSPACE}"
+            "PIPELINE_WORKSPACE=${env.WORKSPACE}",
+            "PIPELINE_DOCKER_TAG=${makeDockerTag(defaults, scmVariables.GIT_COMMIT)}"
           ] + additionalEnvs) {
           if (scriptObj.commands) {
             sh(scriptObj.commands)
