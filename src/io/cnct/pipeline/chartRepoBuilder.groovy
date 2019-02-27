@@ -1187,7 +1187,7 @@ def testTestHandler(scmVars) {
     }
   }
 
-  executeUserScript('Executing stage \'after\' script', scmVars, pipeline.test.afterScript) 
+  executeUserScript('Executing test \'after\' script', scmVars, pipeline.test.afterScript) 
 }
 
 // run staging tests
@@ -1236,8 +1236,6 @@ def destroyHandler(scmVars) {
       sh("kubectl delete namespace ${kubeName(env.JOB_NAME)} --kubeconfig=${env.BUILD_ID}-test.kubeconfig || true")
     }
   }
-
-  executeUserScript('Executing test \'after\' script', scmVars, pipeline.test.afterScript)
 }
 
 def envMapToSetParams(envMap) {
