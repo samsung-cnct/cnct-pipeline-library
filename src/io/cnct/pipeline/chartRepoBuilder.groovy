@@ -1241,8 +1241,8 @@ def destroyHandler(scmVars) {
 def envMapToSetParams(envMap) {
   def setParamString = ""
   for (obj in envMap) {
-    if (obj.key) {
-      if (obj.secret) {
+    if (obj.containsKey("key")) {
+      if (obj.containsKey("secret")) {
         setParamString += " --set ${obj.key}="
         withCredentials([string(credentialsId: defaults.vault.credentials, variable: 'VAULT_TOKEN')]) {
           def secretVal = getVaultKV(
@@ -1252,7 +1252,7 @@ def envMapToSetParams(envMap) {
 
           setParamString += """'${secretVal}'"""
         }
-      } else if (obj.value) {
+      } else if (obj.containsKey("value")) {
         setParamString += " --set ${obj.key}="
         setParamString += """'${obj.value}'"""
       } 
