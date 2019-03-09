@@ -13,7 +13,7 @@ def call(jobName, imageUrl, maxCve, maxLevel, clairService) {
             "containers": [
               [
                 "name": "klar",
-                "image": "quay.io/samsung_cnct/klar:prod",
+                "image": "quay.io/samsung_cnct/klar:2.4.0",
                 "args": [
                   imageUrl
                 ],

@@ -535,10 +535,18 @@ def buildsTestHandler(scmVars) {
 
             def klarExitCode = sh returnStdout: true, script: "kubectl get pod ${klarPod} -o go-template='{{range .status.containerStatuses}}{{.state.terminated.exitCode}}{{end}}' --namespace ${defaults.jenkinsNamespace}"
 
-            // fail build if max vulnerabilities found
-            if ((!ignoreCVE) && (klarExitCode != "0")) {
-              error("Docker image exceeds maximum vulnerabilities, check Klar CVE report for more information. The CVE report will include a link to the CVE and information on what version includes a fix")
-              break
+            // fail build if max vulnerabilities found or an error occured
+            if (!ignoreCVE) {
+              if (klarExitCode == "1") {
+                error("Docker image exceeds maximum vulnerabilities, check Klar CVE report for more information. The CVE report will include a link to the CVE and information on what version includes a fix")
+                break
+              } else if (klarExitCode == "2") {
+                error("Klar/Clair could not analyze image provided due to a runtime error. Check Clair output for details")
+                break
+              } else if (klarExitCode != "0") {
+                error("Klar/Clair returned an unexpected error code. Check Clair output for details")
+                break
+              }              
             }
 
             sh("kubectl delete job ${jobName} --namespace ${defaults.jenkinsNamespace}")
